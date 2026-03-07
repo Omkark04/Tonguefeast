@@ -167,24 +167,32 @@ document.addEventListener('DOMContentLoaded', () => {
     if (mobileQuery.matches) { updateTrustCarousel(); startTrustScroll(); }
   }
 
-  // ── Product Search & Weight Filter (Products Page) ──
-  const filterBtns = document.querySelectorAll('.filter-btn');
+  // ── Product Search & Filter (Products Page) ──
+  const sizeBtns = document.querySelectorAll('.filter-buttons .filter-btn');
+  const typeBtns = document.querySelectorAll('.filter-row .filter-btn[data-type]');
+  const catBtns = document.querySelectorAll('.filter-row .filter-btn[data-category]');
   const productCards = document.querySelectorAll('.products-grid .product-card');
   const searchInput = document.getElementById('productSearch');
 
+  let activeSize = 'all';
+  let activeType = null; // null means no type filter
+  let activeCategory = 'all';
+
   function filterProducts() {
     const searchTerm = (searchInput?.value || '').toLowerCase().trim();
-    const activeFilter = document.querySelector('.filter-btn.active');
-    const sizeFilter = activeFilter ? activeFilter.dataset.filter : 'all';
 
     productCards.forEach(card => {
       const title = (card.querySelector('.card-title')?.textContent || '').toLowerCase();
       const sizes = card.dataset.sizes || '';
+      const type = card.dataset.type || '';
+      const categories = card.dataset.category || '';
 
       const matchesSearch = !searchTerm || title.includes(searchTerm);
-      const matchesSize = sizeFilter === 'all' || sizes.includes(sizeFilter);
+      const matchesSize = activeSize === 'all' || sizes.includes(activeSize);
+      const matchesType = !activeType || type === activeType;
+      const matchesCat = activeCategory === 'all' || categories.includes(activeCategory);
 
-      if (matchesSearch && matchesSize) {
+      if (matchesSearch && matchesSize && matchesType && matchesCat) {
         card.style.display = '';
         card.style.animation = 'fadeIn 0.4s ease forwards';
       } else {
@@ -193,19 +201,45 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  if (filterBtns.length > 0 && productCards.length > 0) {
-    filterBtns.forEach(btn => {
-      btn.addEventListener('click', () => {
-        filterBtns.forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        filterProducts();
-      });
+  // Size filter buttons (exclusive)
+  sizeBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      sizeBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      activeSize = btn.dataset.filter;
+      filterProducts();
     });
-  }
+  });
+
+  // Type filter buttons (toggle)
+  typeBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (btn.classList.contains('active')) {
+        btn.classList.remove('active');
+        activeType = null;
+      } else {
+        typeBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        activeType = btn.dataset.type;
+      }
+      filterProducts();
+    });
+  });
+
+  // Category filter buttons (exclusive)
+  catBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      catBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      activeCategory = btn.dataset.category;
+      filterProducts();
+    });
+  });
 
   if (searchInput) {
     searchInput.addEventListener('input', filterProducts);
   }
+
 
   // ── Bulk Inquiry WhatsApp ──
   document.querySelectorAll('.bulk-inquiry-btn').forEach(btn => {
