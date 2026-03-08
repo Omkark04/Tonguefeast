@@ -148,7 +148,7 @@ input,textarea,select{font-family:inherit;font-size:inherit}
 
 /* HERO */
 .hero{position:relative;min-height:88vh;display:flex;align-items:center;justify-content:center;background:url('../static/Background Images/hero-wide-banner.png') center/cover no-repeat;padding-top:var(--nav-height);width:100%}
-.hero::before{display:none}
+.hero::before{content:'';position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(45, 10, 10, 0.60);z-index:1}
 .hero-inner{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;text-align:center;gap:var(--space-2xl);width:100%;max-width:var(--max-width);padding:var(--space-2xl) var(--space-lg)}
 .hero-content{text-align:center;max-width:760px;width:100%}
 
@@ -209,7 +209,7 @@ input,textarea,select{font-family:inherit;font-size:inherit}
 
 /* PRODUCT CARDS & BEST SELLERS */
 .featured-products{position:relative;background:url('../static/Background Images/back 1.jpg') center/cover fixed;padding:var(--space-4xl) 0}
-.featured-products::before{display:none}
+.featured-products::before{content:'';position:absolute;inset:0;background:rgba(45,10,10,0.85);z-index:0}
 .featured-products .container{position:relative;z-index:1}
 .featured-products .section-label{color:var(--secondary-light)}
 .featured-products .section-title{color:var(--cream)}
@@ -454,7 +454,7 @@ input,textarea,select{font-family:inherit;font-size:inherit}
 
   /* PRODUCT CARDS MOBILE */
   .featured-products{background:url('../static/Background Images/mobile back 1.jpg') center/cover;padding:var(--space-3xl) 0}
-  .featured-products::before{display:none} /* Removed overlay per request */
+  .featured-products::before{display:block} /* Keep overlay for text readability */
   .featured-products .products-scroll{grid-template-columns:repeat(2,1fr);gap:var(--space-md)}
   .product-card{background:rgba(255,255,255,0.08);backdrop-filter:none;-webkit-backdrop-filter:none} /* Disable expensive blur on mobile */
   .product-card .card-image{min-height:160px;padding:var(--space-md)}
