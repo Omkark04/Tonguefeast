@@ -371,6 +371,91 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+  // ── Customer Reviews Auto-Scroll (Mobile) ──
+  const reviewsGrid = document.querySelector('.reviews-grid');
+  const reviewCards = document.querySelectorAll('.review-card');
+  const reviewDots = document.querySelectorAll('.review-dot');
+
+  if (reviewsGrid && reviewCards.length > 0 && reviewDots.length > 0) {
+    let reviewIndex = 0;
+    let reviewInterval;
+
+    const updateReviewDots = (index) => {
+      reviewDots.forEach(d => d.classList.remove('active'));
+      if (reviewDots[index]) reviewDots[index].classList.add('active');
+    };
+
+    const scrollReviews = (index) => {
+      if (!reviewsGrid || !reviewCards[index]) return;
+      const card = reviewCards[index];
+      const scrollLeft = card.offsetLeft - reviewsGrid.offsetLeft - (reviewsGrid.clientWidth - card.clientWidth) / 2;
+      reviewsGrid.scrollTo({ left: scrollLeft, behavior: 'smooth' });
+    };
+
+    const startReviewAutoScroll = () => {
+      clearInterval(reviewInterval);
+      reviewInterval = setInterval(() => {
+        reviewIndex = (reviewIndex + 1) % reviewCards.length;
+        scrollReviews(reviewIndex);
+      }, 4000);
+    };
+
+    const stopReviewAutoScroll = () => {
+      clearInterval(reviewInterval);
+    };
+
+    // Scroll event to sync dots on manual scroll
+    reviewsGrid.addEventListener('scroll', () => {
+      stopReviewAutoScroll();
+      
+      let closestIndex = 0;
+      let minDiff = Infinity;
+      const scrollCenter = reviewsGrid.scrollLeft + reviewsGrid.clientWidth / 2;
+
+      reviewCards.forEach((card, index) => {
+        const cardCenter = card.offsetLeft - reviewsGrid.offsetLeft + card.clientWidth / 2;
+        const diff = Math.abs(scrollCenter - cardCenter);
+        if (diff < minDiff) {
+          minDiff = diff;
+          closestIndex = index;
+        }
+      });
+
+      if (reviewIndex !== closestIndex) {
+        reviewIndex = closestIndex;
+        updateReviewDots(reviewIndex);
+      }
+      
+      // Resume auto scroll after a delay
+      clearTimeout(reviewsGrid.scrollTimeout);
+      reviewsGrid.scrollTimeout = setTimeout(startReviewAutoScroll, 4000);
+    });
+
+    // Dot click
+    reviewDots.forEach((dot, index) => {
+      dot.addEventListener('click', () => {
+        stopReviewAutoScroll();
+        reviewIndex = index;
+        scrollReviews(reviewIndex);
+        startReviewAutoScroll();
+      });
+    });
+
+    // Initialize auto scroll on mobile
+    const reviewMQuery = window.matchMedia('(max-width: 768px)');
+    const initReviews = (e) => {
+      if (e.matches) {
+        updateReviewDots(reviewIndex);
+        startReviewAutoScroll();
+      } else {
+        stopReviewAutoScroll();
+        reviewsGrid.scrollTo({ left: 0 }); // Reset on desktop
+      }
+    };
+    reviewMQuery.addEventListener('change', initReviews);
+    if (reviewMQuery.matches) initReviews(reviewMQuery);
+  }
+
 });
 
 // Add fadeIn keyframe dynamically
