@@ -647,3 +647,118 @@ document.head.appendChild(style);
   mo.observe(document.body, { childList: true, subtree: true });
 })();
 
+
+// ── Masala Scroll-Float Animation (Why Us section — desktop only) ─────────────
+(function initMasalaFloat() {
+  const img     = document.getElementById('masalaFloat');
+  const section = document.getElementById('why-us');
+  if (!img || !section) return;
+
+  function lerp(a, b, t) { return a + (b - a) * t; }
+  function clamp(v, lo, hi) { return Math.min(hi, Math.max(lo, v)); }
+  function ease(t) { return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t; }
+
+  // ── Phase boundaries (as fractions of total scroll progress through section) ──
+  // P_APPEAR : heading reaches upper-third of viewport — image starts entering
+  // P_HOVER  : heading fully visible, image settled right-of-heading
+  // P_DIAG   : half the card row has scrolled off top — diagonal exit begins
+  // P_GONE   : image is fully off-screen left
+  const P_APPEAR = 0.30;
+  const P_HOVER  = 0.48;
+  const P_DIAG   = 0.62;  // ≈ when ~half the card grid has left the top of screen
+  const P_GONE   = 0.98;
+
+  // Landing position: right side of the centered heading, slightly below it
+  // (image top-left will be at ~70vw, ~24vh  →  image sits neatly right of heading)
+  const LAND_TX  = 70;   // vw
+  const LAND_TY  = 26;   // vh
+
+  let ticking = false;
+
+  function update() {
+    ticking = false;
+
+    // ── Desktop only ──
+    if (window.innerWidth <= 1024) {
+      img.style.opacity = '0';
+      return;
+    }
+
+    const r  = section.getBoundingClientRect();
+    const vh = window.innerHeight;
+
+    // prog: 0 = section just entered viewport from bottom,
+    //        1 = section fully exited from top
+    const prog = clamp((vh - r.top) / (r.height + vh), 0, 1);
+
+    // Outside active window → hide
+    if (prog <= P_APPEAR || prog >= P_GONE) {
+      img.style.opacity = '0';
+      return;
+    }
+    img.style.opacity = '1';
+
+    let tx, ty, rot;
+
+    if (prog < P_HOVER) {
+      // ── Phase 1: Fly in from right edge to right-of-heading, rotating ──
+      // Enters from off-screen right, arrives level with & right of the heading
+      const t = ease((prog - P_APPEAR) / (P_HOVER - P_APPEAR));
+      tx  = lerp(115,      LAND_TX, t);  // 115vw → 70vw  (enters from right)
+      ty  = lerp(LAND_TY - 6, LAND_TY, t);  // slight downward diagonal
+      rot = lerp(80,       22,      t);  // spinning in
+    }
+    else if (prog < P_DIAG) {
+      // ── Phase 2: Hover to the right of heading, slow drift ──
+      const t = ease((prog - P_HOVER) / (P_DIAG - P_HOVER));
+      tx  = lerp(LAND_TX, LAND_TX + 1, t);
+      ty  = lerp(LAND_TY, LAND_TY + 2, t);
+      rot = lerp(22,      18,           t);
+    }
+    else {
+      // ── Exit is 3 sub-phases ──────────────────────────────────────────────
+      // 3a (P_DIAG → P_BELOW): diagonal + 360° spin → below first card
+      // 3b (P_BELOW → P_WAIT) : hover below first card
+      // 3c (P_WAIT  → P_GONE) : slide horizontally off to the left
+      const P_BELOW = 0.72;  // landed below first card
+      const P_WAIT  = 0.80;  // start horizontal exit
+      // Position below first card — cards have scrolled up so lower-left viewport is clear
+      const BLW_TX  = 5;    // vw — near left edge, below where first card is
+      const BLW_TY  = 48;   // vh — just below card bottom edge (matches ideal marked position)
+
+      if (prog < P_BELOW) {
+        // 3a: diagonal diagonal down-left with 360° rotation
+        const t = ease((prog - P_DIAG) / (P_BELOW - P_DIAG));
+        tx  = lerp(LAND_TX + 1, BLW_TX, t);
+        ty  = lerp(LAND_TY + 2, BLW_TY, t);
+        rot = lerp(22,          22 - 360, t);  // full 360° counter-clockwise
+      } else if (prog < P_WAIT) {
+        // 3b: hover below first card, gentle slow spin
+        const t = ease((prog - P_BELOW) / (P_WAIT - P_BELOW));
+        tx  = lerp(BLW_TX,      BLW_TX - 1, t);
+        ty  = lerp(BLW_TY,      BLW_TY + 1, t);
+        rot = lerp(22 - 360,    22 - 380,    t);  // ~20° more drift
+      } else {
+        // 3c: exit horizontally from left edge
+        const t = ease((prog - P_WAIT) / (P_GONE - P_WAIT));
+        tx  = lerp(BLW_TX - 1, -120, t);
+        ty  = lerp(BLW_TY + 1, BLW_TY + 2, t);  // barely any vertical change
+        rot = lerp(22 - 380,   22 - 430,    t);  // gentle extra spin while sliding
+      }
+    }
+
+    img.style.transform = `translate(${tx}vw, ${ty}vh) rotate(${rot}deg)`;
+  }
+
+  window.addEventListener('scroll', () => {
+    if (!ticking) { requestAnimationFrame(update); ticking = true; }
+  }, { passive: true });
+
+  window.addEventListener('resize', () => {
+    requestAnimationFrame(update);
+  }, { passive: true });
+
+  update();
+})();
+
+
