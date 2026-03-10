@@ -1,0 +1,19 @@
+# Sitemap
+Sitemap: https://tonguefeast.in/sitemap.xml
+
+# Allow all crawlers
+User-agent: *
+Allow: /
+
+# Block crawling of non-essential pages
+Disallow: /privacy.html
+
+# Block crawling of static assets directories (images don't need indexing)
+Disallow: /static/Background Images/
+Disallow: /static/Blog/
+
+# Allow product images to be indexed (Google Images traffic)
+Allow: /static/Products/
+
+# Crawl-delay (be polite to the server)
+Crawl-delay: 1

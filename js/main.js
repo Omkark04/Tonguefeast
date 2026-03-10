@@ -622,28 +622,24 @@ document.head.appendChild(style);
     lbImg.style.transition = 'transform 0.15s ease';
   });
 
-  // ── Inject eye buttons on every product card image ──
-  function injectEyeButtons() {
+  // ── Make card images clickable to open lightbox (no eye button) ──
+  function initCardImageClicks() {
     document.querySelectorAll('.product-card .card-image').forEach(cardImg => {
-      if (cardImg.querySelector('.card-eye-btn')) return; // already injected
+      if (cardImg.dataset.lbBound) return; // already bound
+      cardImg.dataset.lbBound = '1';
+      cardImg.style.cursor = 'pointer';
       const img = cardImg.querySelector('img');
       if (!img) return;
-      const btn = document.createElement('button');
-      btn.className = 'card-eye-btn';
-      btn.setAttribute('aria-label', 'View image');
-      btn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
-      btn.addEventListener('click', e => {
-        e.stopPropagation();
+      cardImg.addEventListener('click', () => {
         const title = img.closest('.product-card')?.querySelector('.card-title')?.textContent || img.alt || '';
         openLightbox(img.src, title);
       });
-      cardImg.appendChild(btn);
     });
   }
 
   // Run now and also on DOM mutations (in case cards are dynamically added/shown)
-  injectEyeButtons();
-  const mo = new MutationObserver(injectEyeButtons);
+  initCardImageClicks();
+  const mo = new MutationObserver(initCardImageClicks);
   mo.observe(document.body, { childList: true, subtree: true });
 })();
 
