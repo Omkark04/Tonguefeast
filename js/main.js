@@ -720,7 +720,6 @@ document.head.appendChild(style);
 
     let hoverInterval = null;
     let isHovering = false;
-    let autoFlipInterval = null;
 
     // Desktop: Hover to flip
     card.addEventListener('mouseenter', () => {
@@ -740,24 +739,6 @@ document.head.appendChild(style);
       hoverInterval = null;
       cardImg.classList.remove('show-back');
     });
-
-    // Mobile: Auto flip every 1.5s
-    function startMobileAutoFlip() {
-      if (window.innerWidth > 768) {
-        clearInterval(autoFlipInterval);
-        autoFlipInterval = null;
-        cardImg.classList.remove('show-back');
-        return;
-      }
-      if (!autoFlipInterval) {
-        autoFlipInterval = setInterval(() => {
-          cardImg.classList.toggle('show-back');
-        }, 1500);
-      }
-    }
-
-    startMobileAutoFlip();
-    window.addEventListener('resize', startMobileAutoFlip);
   }
 
   function initAll() {
