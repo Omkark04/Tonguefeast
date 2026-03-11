@@ -526,13 +526,56 @@ document.head.appendChild(style);
     applyTransform();
   }
 
-  function openLightbox(src, title) {
-    lbImg.src = src;
+  // Gallery state for multi-image lightbox
+  let galleryImages = [];
+  let galleryIndex = 0;
+
+  // Create prev/next navigation arrows
+  const lbNav = document.createElement('div');
+  lbNav.className = 'lb-nav';
+  lbNav.innerHTML = '<button class="lb-prev" aria-label="Previous">‹</button><button class="lb-next" aria-label="Next">›</button>';
+  lbNav.style.cssText = 'display:none;position:absolute;top:50%;width:100%;z-index:12;pointer-events:none;';
+  lb.appendChild(lbNav);
+  const btnPrev = lbNav.querySelector('.lb-prev');
+  const btnNext = lbNav.querySelector('.lb-next');
+  const navBtnStyle = 'pointer-events:auto;position:absolute;background:rgba(0,0,0,0.6);color:#fff;border:none;font-size:2.5rem;width:48px;height:48px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 0.2s;line-height:1;';
+  btnPrev.style.cssText = navBtnStyle + 'left:16px;';
+  btnNext.style.cssText = navBtnStyle + 'right:16px;';
+
+  // Counter indicator
+  const lbCounter = document.createElement('div');
+  lbCounter.style.cssText = 'display:none;position:absolute;bottom:60px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.6);color:#fff;padding:4px 14px;border-radius:20px;font-size:0.85rem;z-index:12;';
+  lb.appendChild(lbCounter);
+
+  function showGalleryImage(idx) {
+    galleryIndex = idx;
+    lbImg.style.transition = 'opacity 0.3s ease';
+    lbImg.style.opacity = '0';
+    setTimeout(() => {
+      lbImg.src = galleryImages[idx];
+      resetTransform();
+      lbImg.style.opacity = '1';
+    }, 150);
+    lbCounter.textContent = `${idx + 1} / ${galleryImages.length}`;
+  }
+
+  btnPrev.addEventListener('click', e => { e.stopPropagation(); showGalleryImage((galleryIndex - 1 + galleryImages.length) % galleryImages.length); });
+  btnNext.addEventListener('click', e => { e.stopPropagation(); showGalleryImage((galleryIndex + 1) % galleryImages.length); });
+
+  function openLightbox(src, title, images) {
+    galleryImages = images && images.length > 1 ? images : [src];
+    galleryIndex = 0;
+    lbImg.src = galleryImages[0];
     lbImg.alt = title;
     lbTitle.textContent = title;
     resetTransform();
     lb.classList.add('open');
     document.body.style.overflow = 'hidden';
+    // Show/hide nav based on gallery size
+    const hasMultiple = galleryImages.length > 1;
+    lbNav.style.display = hasMultiple ? 'block' : 'none';
+    lbCounter.style.display = hasMultiple ? 'block' : 'none';
+    if (hasMultiple) lbCounter.textContent = `1 / ${galleryImages.length}`;
     // re-trigger hint animation
     const hint = lb.querySelector('.lb-zoom-hint');
     hint.style.animation = 'none';
@@ -542,6 +585,8 @@ document.head.appendChild(style);
   function closeLightbox() {
     lb.classList.remove('open');
     document.body.style.overflow = '';
+    lbNav.style.display = 'none';
+    lbCounter.style.display = 'none';
     setTimeout(() => { lbImg.src = ''; }, 300);
   }
 
@@ -553,6 +598,8 @@ document.head.appendChild(style);
   document.addEventListener('keydown', e => {
     if (!lb.classList.contains('open')) return;
     if (e.key === 'Escape') closeLightbox();
+    if (e.key === 'ArrowLeft' && galleryImages.length > 1) showGalleryImage((galleryIndex - 1 + galleryImages.length) % galleryImages.length);
+    if (e.key === 'ArrowRight' && galleryImages.length > 1) showGalleryImage((galleryIndex + 1) % galleryImages.length);
     if (e.key === '+' || e.key === '=') zoom(0.3, lbWrap.getBoundingClientRect().left + lbWrap.clientWidth/2, lbWrap.getBoundingClientRect().top + lbWrap.clientHeight/2);
     if (e.key === '-') zoom(-0.3, lbWrap.getBoundingClientRect().left + lbWrap.clientWidth/2, lbWrap.getBoundingClientRect().top + lbWrap.clientHeight/2);
   });
@@ -622,17 +669,26 @@ document.head.appendChild(style);
     lbImg.style.transition = 'transform 0.15s ease';
   });
 
-  // ── Make card images clickable to open lightbox (no eye button) ──
+  // ── Make card images clickable to open lightbox (with gallery for front+back) ──
   function initCardImageClicks() {
     document.querySelectorAll('.product-card .card-image').forEach(cardImg => {
       if (cardImg.dataset.lbBound) return; // already bound
       cardImg.dataset.lbBound = '1';
       cardImg.style.cursor = 'pointer';
-      const img = cardImg.querySelector('img');
+      const img = cardImg.querySelector('img:not(.card-back-img)');
       if (!img) return;
       cardImg.addEventListener('click', () => {
         const title = img.closest('.product-card')?.querySelector('.card-title')?.textContent || img.alt || '';
-        openLightbox(img.src, title);
+        // Build gallery: front image + back image (if available)
+        const images = [img.src];
+        const backSrc = cardImg.dataset.back || img.dataset.back;
+        if (backSrc) {
+          // Resolve relative URL to absolute
+          const a = document.createElement('a');
+          a.href = backSrc;
+          images.push(a.href);
+        }
+        openLightbox(img.src, title, images);
       });
     });
   }
@@ -641,6 +697,76 @@ document.head.appendChild(style);
   initCardImageClicks();
   const mo = new MutationObserver(initCardImageClicks);
   mo.observe(document.body, { childList: true, subtree: true });
+})();
+
+// ── Product Card Back-Image 3D Flip ──────────────────────────────────────
+(function initBackImageCycling() {
+  function setupCard(card) {
+    const cardImg = card.querySelector('.card-image');
+    if (!cardImg || cardImg.dataset.backBound) return;
+    cardImg.dataset.backBound = '1';
+
+    // Get back image path from data-back on cardImg or on the img element
+    const backSrc = cardImg.dataset.back || cardImg.querySelector('img[data-back]')?.dataset.back;
+    if (!backSrc) return;
+
+    // Create back image element
+    const backEl = document.createElement('img');
+    backEl.className = 'card-back-img';
+    backEl.src = backSrc;
+    backEl.alt = 'Product back side';
+    backEl.loading = 'lazy';
+    cardImg.appendChild(backEl);
+
+    let hoverInterval = null;
+    let isHovering = false;
+    let autoFlipInterval = null;
+
+    // Desktop: Hover to flip
+    card.addEventListener('mouseenter', () => {
+      if (window.innerWidth <= 768) return; // Disable hover logic on mobile
+      isHovering = true;
+      cardImg.classList.add('show-back');
+      hoverInterval = setInterval(() => {
+        if (!isHovering) return;
+        cardImg.classList.toggle('show-back');
+      }, 2000);
+    });
+
+    card.addEventListener('mouseleave', () => {
+      if (window.innerWidth <= 768) return;
+      isHovering = false;
+      clearInterval(hoverInterval);
+      hoverInterval = null;
+      cardImg.classList.remove('show-back');
+    });
+
+    // Mobile: Auto flip every 1.5s
+    function startMobileAutoFlip() {
+      if (window.innerWidth > 768) {
+        clearInterval(autoFlipInterval);
+        autoFlipInterval = null;
+        cardImg.classList.remove('show-back');
+        return;
+      }
+      if (!autoFlipInterval) {
+        autoFlipInterval = setInterval(() => {
+          cardImg.classList.toggle('show-back');
+        }, 1500);
+      }
+    }
+
+    startMobileAutoFlip();
+    window.addEventListener('resize', startMobileAutoFlip);
+  }
+
+  function initAll() {
+    document.querySelectorAll('.product-card').forEach(setupCard);
+  }
+
+  initAll();
+  const mo2 = new MutationObserver(initAll);
+  mo2.observe(document.body, { childList: true, subtree: true });
 })();
 
 
