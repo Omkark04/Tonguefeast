@@ -494,8 +494,8 @@ input,textarea,select{font-family:inherit;font-size:inherit}
   .featured-products::before{display:block} /* Keep overlay for text readability */
   .featured-products .products-scroll{grid-template-columns:repeat(2,1fr);gap:var(--space-md)}
   .product-card{background:rgba(255,255,255,0.08);backdrop-filter:none;-webkit-backdrop-filter:none} /* Disable expensive blur on mobile */
-  .product-card .card-image{min-height:160px;padding:var(--space-md)}
-  .product-card .card-image img{max-height:140px;filter:drop-shadow(0 4px 8px rgba(0,0,0,0.3))}
+  .product-card .card-image{min-height:160px;padding:calc(var(--space-md) + 4px) var(--space-md)}
+  .product-card .card-image img{max-height:130px;filter:drop-shadow(0 4px 8px rgba(0,0,0,0.3))}
   .product-card .card-body{padding:var(--space-md)}
   .product-card .card-title{font-size:1rem;margin-bottom:4px}
   .product-card .card-category{font-size:0.6rem;letter-spacing:1px}
@@ -505,6 +505,8 @@ input,textarea,select{font-family:inherit;font-size:inherit}
   .product-card .card-sizes{font-size:0.72rem;margin-bottom:var(--space-sm)}
   .product-card .card-actions{flex-direction:column;gap:6px}
   .product-card .card-actions .btn{padding:8px 10px;font-size:0.72rem;flex:none;width:100%;min-height:36px}
+  .product-card .card-badge{font-size:0.55rem;padding:3px 8px;border-radius:var(--radius-md) 0 6px 0;letter-spacing:0.5px}
+  .products-grid .product-card .card-image{min-height:210px} /* Specific height increase for products page */
   .product-card:hover{transform:none;box-shadow:var(--shadow-sm);border-color:rgba(255,255,255,0.1)}
 
   /* BRAND STORY */
@@ -581,6 +583,59 @@ input,textarea,select{font-family:inherit;font-size:inherit}
   /* FOOTER SMALL */
   .footer-grid{grid-template-columns:1fr}
   .footer-bottom{flex-direction:column;text-align:center}
+  
+  .footer-bottom-links {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-md);
+    width: 100%;
+    margin-top: var(--space-md);
+  }
+  
+  .footer-bottom-links > a:nth-child(1) {
+    grid-column: 1;
+    justify-self: start;
+  }
+  
+  .footer-bottom-links > a:nth-child(2) {
+    grid-column: 2;
+    justify-self: end;
+  }
+  
+  .footer-attribution {
+    grid-column: span 2;
+    justify-content: center;
+    margin-top: var(--space-xs);
+  }
+}
+
+/* FOOTER BOTTOM LINKS BASE */
+.footer-bottom-links {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+}
+
+.footer-attribution {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: rgba(255,255,255,0.7);
+}
+
+.footer-attribution a {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #fff;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.footer-attribution img {
+  height: 28px;
 }
 
 /* TRUST BADGES DOT NAV */
