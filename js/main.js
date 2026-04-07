@@ -456,6 +456,86 @@ document.addEventListener('DOMContentLoaded', () => {
     if (reviewMQuery.matches) initReviews(reviewMQuery);
   }
 
+  // ── Instagram Carousel Auto-Scroll (Mobile) ──
+  const igGrid = document.querySelector('.instagram-grid');
+  const igCards = document.querySelectorAll('.ig-card');
+  const igDots = document.querySelectorAll('.ig-dot');
+
+  if (igGrid && igCards.length > 0 && igDots.length > 0) {
+    let igIndex = 0;
+    let igInterval;
+
+    const updateIgDots = (index) => {
+      igDots.forEach(d => d.classList.remove('active'));
+      if (igDots[index]) igDots[index].classList.add('active');
+    };
+
+    const scrollIg = (index) => {
+      if (!igGrid || !igCards[index]) return;
+      const card = igCards[index];
+      const scrollLeft = card.offsetLeft - igGrid.offsetLeft - (igGrid.clientWidth - card.clientWidth) / 2;
+      igGrid.scrollTo({ left: scrollLeft, behavior: 'smooth' });
+    };
+
+    const startIgAutoScroll = () => {
+      clearInterval(igInterval);
+      igInterval = setInterval(() => {
+        igIndex = (igIndex + 1) % igCards.length;
+        scrollIg(igIndex);
+      }, 5000); // 5 seconds as requested
+    };
+
+    const stopIgAutoScroll = () => {
+      clearInterval(igInterval);
+    };
+
+    igGrid.addEventListener('scroll', () => {
+      stopIgAutoScroll();
+      let closestIndex = 0;
+      let minDiff = Infinity;
+      const scrollCenter = igGrid.scrollLeft + igGrid.clientWidth / 2;
+
+      igCards.forEach((card, index) => {
+        const cardCenter = card.offsetLeft - igGrid.offsetLeft + card.clientWidth / 2;
+        const diff = Math.abs(scrollCenter - cardCenter);
+        if (diff < minDiff) {
+          minDiff = diff;
+          closestIndex = index;
+        }
+      });
+
+      if (igIndex !== closestIndex) {
+        igIndex = closestIndex;
+        updateIgDots(igIndex);
+      }
+      
+      clearTimeout(igGrid.scrollTimeout);
+      igGrid.scrollTimeout = setTimeout(startIgAutoScroll, 5000);
+    });
+
+    igDots.forEach((dot, index) => {
+      dot.addEventListener('click', () => {
+        stopIgAutoScroll();
+        igIndex = index;
+        scrollIg(igIndex);
+        startIgAutoScroll();
+      });
+    });
+
+    const igMQuery = window.matchMedia('(max-width: 992px)');
+    const initIg = (e) => {
+      if (e.matches) {
+        updateIgDots(igIndex);
+        startIgAutoScroll();
+      } else {
+        stopIgAutoScroll();
+        igGrid.scrollTo({ left: 0 });
+      }
+    };
+    igMQuery.addEventListener('change', initIg);
+    if (igMQuery.matches) initIg(igMQuery);
+  }
+
 });
 
 // Add fadeIn keyframe dynamically
