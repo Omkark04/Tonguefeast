@@ -15,5 +15,5 @@ Disallow: /static/Blog/
 # Allow product images to be indexed (Google Images traffic)
 Allow: /static/Products/
 
-# Crawl-delay (be polite to the server)
-Crawl-delay: 1
+# Crawl-delay (encourage faster crawling for this static site)
+Crawl-delay: 0.5
