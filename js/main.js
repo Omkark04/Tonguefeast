@@ -4,6 +4,84 @@
 
 document.addEventListener('DOMContentLoaded', () => {
 
+  // ── Hero Background Slideshow ──
+  const initHeroSlider = (sliderSelector, dotsSelector, checkActive) => {
+    const slider = document.querySelector(sliderSelector);
+    if (!slider) return;
+    const slides = slider.querySelectorAll('.slide');
+    const dots = document.querySelectorAll(dotsSelector);
+    let currentSlideIndex = 0;
+    let slideInterval = null;
+
+    function showSlide(index) {
+      if (slides.length === 0) return;
+      currentSlideIndex = (index + slides.length) % slides.length;
+      
+      slides.forEach((slide, i) => {
+        slide.classList.toggle('active', i === currentSlideIndex);
+      });
+      
+      dots.forEach((dot, i) => {
+        dot.classList.toggle('active', i === currentSlideIndex);
+      });
+    }
+
+    function startSlideShow() {
+      if (slideInterval) clearInterval(slideInterval);
+      slideInterval = setInterval(() => {
+        showSlide(currentSlideIndex + 1);
+      }, 5000);
+    }
+
+    function stopSlideShow() {
+      if (slideInterval) {
+        clearInterval(slideInterval);
+        slideInterval = null;
+      }
+    }
+
+    function resetSlideShowTimer() {
+      stopSlideShow();
+      startSlideShow();
+    }
+
+    dots.forEach(dot => {
+      dot.addEventListener('click', () => {
+        const targetIndex = parseInt(dot.getAttribute('data-index'), 10);
+        showSlide(targetIndex);
+        resetSlideShowTimer();
+      });
+    });
+
+    // Check visibility and run/stop slideshow
+    function checkState() {
+      if (checkActive()) {
+        if (!slideInterval) {
+          startSlideShow();
+        }
+      } else {
+        stopSlideShow();
+      }
+    }
+
+    checkState();
+    window.addEventListener('resize', checkState);
+  };
+
+  // Initialize Desktop Slideshow (active when window > 768px)
+  initHeroSlider(
+    '.hero-slider.desktop-only', 
+    '.hero-dots-container.desktop-only .hero-dot', 
+    () => window.innerWidth > 768
+  );
+
+  // Initialize Mobile Slideshow (active when window <= 768px)
+  initHeroSlider(
+    '.hero-slider.mobile-only', 
+    '.hero-dots-container.mobile-only .hero-dot', 
+    () => window.innerWidth <= 768
+  );
+
   // ── Sticky Navigation ──
   const navbar = document.querySelector('.navbar');
   const handleScroll = () => {
