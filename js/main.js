@@ -261,11 +261,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     productCards.forEach(card => {
       const title = (card.querySelector('.card-title')?.textContent || '').toLowerCase();
+      const metaTagsText = Array.from(card.querySelectorAll('.meta-tag')).map(t => t.textContent.toLowerCase()).join(' ');
       const sizes = card.dataset.sizes || '';
       const type = card.dataset.type || '';
       const categories = card.dataset.category || '';
 
-      const matchesSearch = !searchTerm || title.includes(searchTerm);
+      const matchesSearch = !searchTerm || title.includes(searchTerm) || metaTagsText.includes(searchTerm);
       const matchesSize = activeSize === 'all' || sizes.includes(activeSize);
       const matchesType = !activeType || type === activeType;
       const matchesCat = activeCategory === 'all' || categories.includes(activeCategory);
@@ -317,6 +318,25 @@ document.addEventListener('DOMContentLoaded', () => {
   if (searchInput) {
     searchInput.addEventListener('input', filterProducts);
   }
+
+  // Interactive Flavor Filtering via Meta Tags
+  const metaTagsList = document.querySelectorAll('.products-grid .meta-tag');
+  metaTagsList.forEach(tag => {
+    tag.addEventListener('click', (e) => {
+      e.preventDefault();
+      const flavorStr = tag.textContent.trim();
+      if (searchInput) {
+        searchInput.value = flavorStr;
+        filterProducts();
+        
+        // Scroll slightly up so the user sees the filtered grid and search bar
+        window.scrollTo({
+          top: document.querySelector('.products-filter').offsetTop - 100,
+          behavior: 'smooth'
+        });
+      }
+    });
+  });
 
 
   // ── Bulk Inquiry WhatsApp ──
