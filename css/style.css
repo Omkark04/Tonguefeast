@@ -76,7 +76,7 @@
   --transition-base: 0.3s ease;
   --transition-slow: 0.5s ease;
   --max-width: 1280px;
-  --nav-height: 98px;
+  --nav-height: 80px;
 }
 
 *,
@@ -847,9 +847,34 @@ select {
 
 @media(min-width:769px) {
   .hero {
-    min-height: 110vh;
-    height: 110vh;
+    min-height: auto;
+    height: auto;
+    aspect-ratio: 1942 / 809;
     background: none;
+    padding-top: 0;
+    margin-top: var(--nav-height);
+  }
+
+  .hero .hero-inner {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    margin-bottom: 0;
+    padding: 20px 30px;
+    background: linear-gradient(to top, rgba(0,0,0,0.55) 0%, transparent 100%);
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+  }
+
+  .hero .hero-content {
+    padding-top: 0;
+  }
+
+  .hero .hero-buttons {
+    align-items: center;
   }
 }
 
@@ -3819,5 +3844,127 @@ select {
 @media(max-width: 480px) {
   .ig-card {
     flex: 0 0 calc(90vw - 32px);
+  }
+}
+
+/* ═══════════ MOBILE BOTTOM NAVIGATION BAR ═══════════ */
+.mobile-bottom-nav {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1100;
+  background: #fff;
+  border-top: 1px solid #e5e5e5;
+  box-shadow: 0 -2px 16px rgba(0, 0, 0, 0.08);
+  padding: 0;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.mobile-bottom-nav .bottom-nav-inner {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-around;
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.mobile-bottom-nav .bottom-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  padding: 8px 0 6px;
+  text-decoration: none;
+  color: #757575;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  transition: color 0.2s ease, background 0.2s ease;
+  position: relative;
+  gap: 2px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mobile-bottom-nav .bottom-nav-item i,
+.mobile-bottom-nav .bottom-nav-item svg {
+  font-size: 1.25rem;
+  width: 22px;
+  height: 22px;
+  margin-bottom: 1px;
+}
+
+.mobile-bottom-nav .bottom-nav-item span {
+  display: block;
+  line-height: 1;
+}
+
+/* Active state */
+.mobile-bottom-nav .bottom-nav-item.active {
+  color: var(--primary);
+}
+
+.mobile-bottom-nav .bottom-nav-item.active::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 25%;
+  right: 25%;
+  height: 2.5px;
+  background: var(--primary);
+  border-radius: 0 0 4px 4px;
+}
+
+/* Amazon item special styling */
+.mobile-bottom-nav .bottom-nav-item.nav-amazon {
+  color: #FF9900;
+}
+
+.mobile-bottom-nav .bottom-nav-item.nav-amazon i {
+  font-size: 1.35rem;
+}
+
+/* Hover / tap */
+.mobile-bottom-nav .bottom-nav-item:active {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+@media (max-width: 768px) {
+  /* Increase hero height for mobile banner and ensure image fits nicely */
+  .hero {
+    min-height: 125vw !important;
+    aspect-ratio: 4/5;
+    background: none !important; /* Hide desktop background if it leaks */
+  }
+
+  .hero-slider.mobile-only {
+    top: var(--nav-height) !important;
+    height: calc(100% - var(--nav-height)) !important;
+  }
+
+  .hero-slider.mobile-only .slide {
+    background-size: cover !important;
+    background-position: center top !important;
+  }
+
+  /* Show bottom nav */
+  .mobile-bottom-nav {
+    display: block;
+  }
+
+  /* Add bottom padding to body so footer content is not hidden behind bottom nav */
+  body {
+    padding-bottom: 60px;
+  }
+
+  /* Move WhatsApp and back-to-top buttons above the bottom nav */
+  .whatsapp-float {
+    bottom: 74px !important;
+  }
+  .back-to-top {
+    bottom: 130px !important;
   }
 }
