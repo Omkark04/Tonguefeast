@@ -4041,3 +4041,12 @@ select {
   box-shadow: 0 2px 5px rgba(0,0,0,0.15);
   transform: translateY(-2px);
 }
+
+/* ═══════════ PRODUCT CARD PRICE ═══════════ */
+.card-price {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--primary);
+  margin-top: 8px;
+  letter-spacing: 0.3px;
+}

@@ -931,6 +931,7 @@ document.head.appendChild(style);
 
 // ── Masala Scroll-Float Animation (Why Us section — desktop only) ─────────────
 (function initMasalaFloat() {
+  return; // DISABLED: User requested the image stay stationary.
   const img     = document.getElementById('masalaFloat');
   const section = document.getElementById('why-us');
   if (!img || !section) return;
