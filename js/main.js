@@ -352,6 +352,20 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+  // ── Pre-fill Contact Form via URL Parameters ──
+  const urlParams = new URLSearchParams(window.location.search);
+  const typeParam = urlParams.get('type');
+  if (typeParam) {
+    const businessTypeSelect = document.getElementById('businessType');
+    if (businessTypeSelect) {
+      if (typeParam.toLowerCase() === 'wholesale') {
+         businessTypeSelect.value = 'Wholesale / Bulk Order';
+      } else if (typeParam.toLowerCase() === 'distributor') {
+         businessTypeSelect.value = 'Distributorship Details';
+      }
+    }
+  }
+
   // ── Contact Form Validation ──
   const contactForm = document.getElementById('contactForm');
   if (contactForm) {
@@ -450,24 +464,52 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ── Blog expand/collapse (Blog page) ──
+  function openArticle(articleId, buttonEl) {
+    const detail = document.getElementById(articleId);
+    if (detail) {
+      const isVisible = detail.style.display === 'block';
+      // Hide all
+      document.querySelectorAll('.blog-detail-content').forEach(d => d.style.display = 'none');
+      document.querySelectorAll('.blog-read-more').forEach(b => b.textContent = 'Read Recipe →');
+      if (!isVisible) {
+        detail.style.display = 'block';
+        if (buttonEl) buttonEl.textContent = 'Close Recipe ×';
+        const offset = document.querySelector('.navbar') ? document.querySelector('.navbar').offsetHeight + 20 : 0;
+        const top = detail.getBoundingClientRect().top + window.pageYOffset - offset;
+        window.scrollTo({ top, behavior: 'smooth' });
+        
+        // Update URL hash
+        if (history.pushState) {
+          history.pushState(null, null, '#' + articleId);
+        } else {
+          window.location.hash = '#' + articleId;
+        }
+      } else {
+        // Toggle closed
+        if (history.pushState) {
+          history.pushState(null, null, window.location.pathname);
+        }
+      }
+    }
+  }
+
   document.querySelectorAll('.blog-read-more').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.preventDefault();
       const articleId = btn.dataset.article;
-      const detail = document.getElementById(articleId);
-      if (detail) {
-        const isVisible = detail.style.display === 'block';
-        // Hide all
-        document.querySelectorAll('.blog-detail-content').forEach(d => d.style.display = 'none');
-        document.querySelectorAll('.blog-read-more').forEach(b => b.textContent = 'Read Article →');
-        if (!isVisible) {
-          detail.style.display = 'block';
-          btn.textContent = 'Close Article ×';
-          detail.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-      }
+      openArticle(articleId, btn);
     });
   });
+
+  // Handle direct navigation via Hash on load
+  if (window.location.hash) {
+    const hash = window.location.hash.substring(1);
+    const detail = document.getElementById(hash);
+    if (detail && detail.classList.contains('blog-detail-content')) {
+      const btn = document.querySelector(`.blog-read-more[data-article="${hash}"]`);
+      setTimeout(() => openArticle(hash, btn), 400);
+    }
+  }
 
   // ── Customer Reviews Auto-Scroll (Mobile) ──
   const reviewsGrid = document.querySelector('.reviews-grid');

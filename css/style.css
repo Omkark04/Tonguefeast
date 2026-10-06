@@ -322,6 +322,14 @@ select {
   white-space: nowrap
 }
 
+@media(max-width:768px) {
+  .btn-whatsapp {
+    padding: 10px 12px;
+    font-size: 0.8rem;
+    gap: 6px;
+  }
+}
+
 .btn-whatsapp:hover {
   background: #1DA851;
   transform: translateY(-2px);
