@@ -2978,7 +2978,7 @@ select {
 
   /* PRODUCT CARDS MOBILE */
   .featured-products {
-    background: url('../static/Background Images/mobile back 1.jpg') center/cover;
+    background: url('../static/Background Images/mobile-hero.png') center/cover;
     padding: var(--space-3xl) 0
   }
 
@@ -4035,6 +4035,45 @@ select {
   }
   .back-to-top {
     bottom: 130px !important;
+  }
+
+  .hide-on-mobile {
+    display: none !important;
+  }
+}
+
+.privacy-content {
+  background: #ffffff;
+  padding: var(--space-xl) var(--space-2xl);
+  margin: var(--space-2xl) auto;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  max-width: 900px;
+  color: var(--dark-text);
+  line-height: 1.8;
+}
+.privacy-content h2 {
+  font-family: var(--font-heading);
+  color: var(--primary-dark);
+  margin-top: var(--space-xl);
+  margin-bottom: var(--space-md);
+  font-size: 1.8rem;
+  border-bottom: 2px solid var(--secondary-light);
+  padding-bottom: 8px;
+}
+.privacy-content ul {
+  list-style: disc;
+  margin-left: var(--space-xl);
+  margin-bottom: var(--space-md);
+}
+.privacy-content p {
+  margin-bottom: var(--space-md);
+}
+@media (max-width: 768px) {
+  .privacy-content {
+    padding: var(--space-lg);
+    margin: var(--space-lg) auto;
+    width: 92%;
   }
 }
 
